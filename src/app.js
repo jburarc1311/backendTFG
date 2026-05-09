@@ -1,5 +1,10 @@
 import dotenv from "dotenv";
-dotenv.config();
+
+if (process.env.NODE_ENV !== "production") {
+  dotenv.config();
+}
+
+console.log("MONGODB_URI:", process.env.MONGODB_URI);
 
 import express from "express";
 import cookieParser from "cookie-parser";
