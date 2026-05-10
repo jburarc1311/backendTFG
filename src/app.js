@@ -36,6 +36,7 @@ const corsOption = {
 };
 
 app.use(cors(corsOption));
+app.options("*", cors(corsOption));
 app.use(cookieParser());
 
 // Middlewares de parseo para JSON y URL encoded
