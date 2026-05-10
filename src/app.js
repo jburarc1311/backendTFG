@@ -26,10 +26,13 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const app = express();
 
 const corsOption = {
-  origin: "true", // Solo Angular puede hacer peticiones
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"], // Métodos HTTP permitidos
-  allowedHeaders: ["Content-Type", "Authorization"], // Headers que puede enviar Angular
-  credentials: true, // Permite enviar cookies entre dominios
+  origin: [
+    "http://localhost:4200",
+    "https://frontend-4scyxus6k-jburarc1311s-projects.vercel.app"
+  ],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
 };
 
 app.use(cors(corsOption));
