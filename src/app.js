@@ -1,8 +1,6 @@
 import dotenv from "dotenv";
 
-if (process.env.NODE_ENV !== "production") {
   dotenv.config();
-}
 
 console.log("MONGODB_URI:", process.env.MONGODB_URI);
 
