@@ -80,11 +80,6 @@ app.get("/", (req, res) => {
   res.json({ message: "API REST con Express.js" });
 });
 
-// 404
-app.use((req, res) => {
-  res.status(404).json({ message: "Página no encontrada" });
-});
-
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
@@ -118,6 +113,13 @@ app.post("/chat", async (req, res) => {
     res.status(500).json({ error: "Error en Gemini" });
   }
 });
+
+// 404
+app.use((req, res) => {
+  res.status(404).json({ message: "Página no encontrada" });
+});
+
+
 
 // Iniciar servidor
 conexionBD()
