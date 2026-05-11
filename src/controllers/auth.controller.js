@@ -12,7 +12,7 @@ import { enviarEmailActivacion } from "../mailer.js";
 export const register = async (req, res) => {
   try {
     const { name, email, password, descripcion, ubicacion } = req.body;
-    
+
     console.log("BODY REGISTER:", req.body);
 
     // Hashea la contraseña de forma segura
@@ -125,17 +125,21 @@ export const login = async (req, res) => {
     }
 
     console.log("PASSWORD INPUT:", password);
-console.log("PASSWORD DB:", usuario.password);
-console.log("TIPO INPUT:", typeof password);
-console.log("TIPO DB:", typeof usuario.password);
+    console.log("PASSWORD DB:", usuario.password);
+    console.log("TIPO INPUT:", typeof password);
+    console.log("TIPO DB:", typeof usuario.password);
 
     // Verificar contraseña
     // Verificar la contraseña, comparar con bcrypt
-    const validPass = await bcrypt.compare(password, usuario.password);
+    let validPass;
 
-    if (!validPass) {
-      return res.status(401).json({
-        message: "Credenciales incorrectas",
+    try {
+      validPass = await bcrypt.compare(password, usuario.password);
+    } catch (err) {
+      console.error("❌ ERROR BCRYPT:", err);
+      return res.status(500).json({
+        message: "Error en comparación de contraseña",
+        error: err.message,
       });
     }
 
