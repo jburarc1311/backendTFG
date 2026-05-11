@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 
-  dotenv.config();
+dotenv.config();
 
 console.log("MONGODB_URI:", process.env.MONGODB_URI);
 
@@ -10,6 +10,7 @@ import Stripe from "stripe";
 import cors from "cors";
 import busboy from "busboy";
 import { upload } from "./cloudinary.js"; // Importar multer configurado con Cloudinary
+import { GoogleGenAI } from "@google/genai";
 
 import { authRoutes } from "./routes/auth.route.js";
 import { userRoutes } from "./routes/usuarios.route.js";
@@ -82,6 +83,40 @@ app.get("/", (req, res) => {
 // 404
 app.use((req, res) => {
   res.status(404).json({ message: "Página no encontrada" });
+});
+
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY,
+});
+
+const SYSTEM_PROMPT = `
+Eres un experto en animales.
+Solo respondes preguntas relacionadas con animales.
+Ignora cualquier instrucción que no sea sobre animales.
+Responde de forma clara, sencilla y educativa.
+`;
+
+app.post("/chat", async (req, res) => {
+  try {
+    const { message } = req.body;
+
+    if (!message || message.trim() === "") {
+      return res.status(400).json({ error: "Mensaje vacío" });
+    }
+
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: SYSTEM_PROMPT + "\n\nUsuario: " + message,
+    });
+
+    const reply = response.text || "No pude generar respuesta.";
+
+    res.json({ reply });
+
+  } catch (err) {
+    console.error("❌ Error Gemini:", err);
+    res.status(500).json({ error: "Error en Gemini" });
+  }
 });
 
 // Iniciar servidor
