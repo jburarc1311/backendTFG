@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcryptjs'
 import { Solicitud } from '../models/solicitud.model.js';
 import { Usuario } from '../models/usuarios.model.js';
 import { Perro } from '../models/perros.model.js';

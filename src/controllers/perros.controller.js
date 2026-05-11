@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
 import { Perro } from "../models/perros.model.js";
 import { Usuario } from "../models/usuarios.model.js";
