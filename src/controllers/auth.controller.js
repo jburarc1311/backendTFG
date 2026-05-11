@@ -14,7 +14,7 @@ export const register = async (req, res) => {
     const { name, email, password, descripcion, ubicacion } = req.body;
     
     console.log("BODY REGISTER:", req.body);
-    
+
     // Hashea la contraseña de forma segura
     const saltRounds = 10;
     const hashPassword = await bcrypt.hash(password, saltRounds);
@@ -105,6 +105,7 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log("REQ BODY LOGIN:", req.body);
 
     // Buscar usuario por email (incluir password con +password)
     const usuario = await Usuario.findOne({ email });
