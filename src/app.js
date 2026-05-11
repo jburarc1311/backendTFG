@@ -28,7 +28,7 @@ const app = express();
 const corsOption = {
   origin: [
     "http://localhost:4200",
-    "https://frontend-4scyxus6k-jburarc1311s-projects.vercel.app"
+    "https://frontendtfg-production-86fa.up.railway.app"
   ],
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
