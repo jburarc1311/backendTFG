@@ -104,85 +104,27 @@ export const register = async (req, res) => {
 // LOGIN de usuario existente
 export const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
     console.log("REQ BODY LOGIN:", req.body);
 
-    // Buscar usuario por email (incluir password con +password)
-    const usuario = await Usuario.findOne({ email });
+    const usuario = await Usuario.findOne({ email: req.body.email });
 
-    // Verificar si el usuario existe
+    console.log("USUARIO ENCONTRADO:", usuario);
+
     if (!usuario) {
-      return res.status(401).json({
-        message: "Credenciales incorrectas",
-      });
+      return res.status(401).json({ message: "No existe usuario" });
     }
 
-    // Verificar si el usuario está activo
-    if (!usuario.active) {
-      return res.status(403).json({
-        message: "Usuario inactivo. Contacte al administrador",
-      });
-    }
+    const validPass = await bcrypt.compare(
+      req.body.password,
+      usuario.password
+    );
 
-    console.log("PASSWORD INPUT:", password);
-    console.log("PASSWORD DB:", usuario.password);
-    console.log("TIPO INPUT:", typeof password);
-    console.log("TIPO DB:", typeof usuario.password);
+    console.log("PASSWORD OK:", validPass);
 
-    // Verificar contraseña
-    // Verificar la contraseña, comparar con bcrypt
-    let validPass;
-
-    try {
-      validPass = await bcrypt.compare(password, usuario.password);
-    } catch (err) {
-      console.error("❌ ERROR BCRYPT:", err);
-      return res.status(500).json({
-        message: "Error en comparación de contraseña",
-        error: err.message,
-      });
-    }
-
-    // Preparar payload para los tokens
-    const payload = {
-      id: usuario._id,
-      email: usuario.email,
-      role: usuario.role,
-    };
-
-    // Generar tokens
-    const accessToken = generarAccessToken(payload);
-    const refreshToken = generarRefreshToken(payload);
-
-    //guardar el refreshToken
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "strict",
-      path: "/api",
-    });
-
-    res.status(200).json({
-      message: "Login exitoso",
-      data: {
-        accessToken,
-        user: {
-          id: usuario._id,
-          name: usuario.name,
-          descripcion: usuario.descripcion,
-          email: usuario.email,
-          ubicacion: usuario.ubicacion || "",
-          role: usuario.role,
-          photo: usuario.photo || "",
-          ubicacion: usuario.ubicacion || "",
-        },
-      },
-    });
+    return res.json({ ok: true });
   } catch (error) {
-    res.status(500).json({
-      message: "Error al iniciar sesión",
-      error: error.message,
-    });
+    console.error("LOGIN ERROR:", error);
+    return res.status(500).json({ error: error.message });
   }
 };
 
