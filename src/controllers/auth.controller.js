@@ -41,7 +41,7 @@ export const register = async (req, res) => {
     const htmlContent = contenidoHTML(email, name, urlActivacion);
 
     try {
-      await sendActivationEmail(email, urlActivacion, name);
+      await enviaremailActivacion(email, urlActivacion, name);
       console.log("Email enviado correctamente");
     } catch (err) {
       console.log("Error enviando email:", err.message);
