@@ -108,8 +108,6 @@ export const login = async (req, res) => {
 
     const usuario = await Usuario.findOne({ email: req.body.email });
 
-    console.log("USUARIO ENCONTRADO:", usuario);
-
     if (!usuario) {
       return res.status(401).json({ message: "No existe usuario" });
     }
@@ -119,9 +117,41 @@ export const login = async (req, res) => {
       usuario.password
     );
 
-    console.log("PASSWORD OK:", validPass);
+    if (!validPass) {
+      return res.status(401).json({ message: "Contraseña incorrecta" });
+    }
 
-    return res.json({ ok: true });
+    const payload = {
+      id: usuario._id,
+      email: usuario.email,
+      role: usuario.role,
+    };
+
+    const accessToken = generarAccessToken(payload);
+    const refreshToken = generarRefreshToken(payload);
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "strict",
+      path: "/api",
+    });
+
+    return res.json({
+      message: "Login correcto",
+      data: {
+        accessToken,
+        user: {
+          id: usuario._id,
+          name: usuario.name,
+          email: usuario.email,
+          role: usuario.role,
+          photo: usuario.photo,
+          ubicacion: usuario.ubicacion,
+        },
+      },
+    });
+
   } catch (error) {
     console.error("LOGIN ERROR:", error);
     return res.status(500).json({ error: error.message });
