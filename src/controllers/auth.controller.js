@@ -281,7 +281,7 @@ export const activaCuenta = async (req, res) => {
             <h1>❌ Error de Activación</h1>
             <p>El enlace de activación es inválido o ha expirado.</p>
             <p>Por favor, intenta registrarte de nuevo.</p>
-            <a href="http://localhost:4200/register">Volver al Registro</a>
+            <a href="https://frontendtfg-production-86fa.up.railway.app/login">Volver al Registro</a>
           </div>
         </body>
         </html>
@@ -314,7 +314,7 @@ export const activaCuenta = async (req, res) => {
           <h1>✅ ¡Cuenta Activada!</h1>
           <p>Tu cuenta ha sido activada correctamente.</p>
           <p>Ya puedes iniciar sesión en la plataforma.</p>
-          <a href="http://localhost:4200/login">Ir al Login</a>
+          <a href="https://frontendtfg-production-86fa.up.railway.app/login">Ir al Login</a>
         </div>
       </body>
       </html>
@@ -341,7 +341,7 @@ export const activaCuenta = async (req, res) => {
           <h1>❌ Error</h1>
           <p>Hubo un error al activar tu cuenta.</p>
           <p>Por favor, intenta más tarde.</p>
-          <a href="http://localhost:4200">Volver al Inicio</a>
+          <a href="https://frontendtfg-production-86fa.up.railway.app/login">Volver al Inicio</a>
         </div>
       </body>
       </html>
