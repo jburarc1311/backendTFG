@@ -124,6 +124,11 @@ export const login = async (req, res) => {
       });
     }
 
+    console.log("PASSWORD INPUT:", password);
+console.log("PASSWORD DB:", usuario.password);
+console.log("TIPO INPUT:", typeof password);
+console.log("TIPO DB:", typeof usuario.password);
+
     // Verificar contraseña
     // Verificar la contraseña, comparar con bcrypt
     const validPass = await bcrypt.compare(password, usuario.password);
