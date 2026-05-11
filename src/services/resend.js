@@ -5,7 +5,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 export const enviarEmailContacto = async ({ nombre, motivo, mensaje }) => {
   await resend.emails.send({
     from: "onboarding@resend.dev",
-    to: "tuemail@dominio.com",
+    to: "joseab078@gmail.com",
     subject: `Contacto: ${motivo}`,
     html: `
       <h2>Nuevo mensaje de contacto</h2>
