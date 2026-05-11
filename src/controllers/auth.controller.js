@@ -6,7 +6,7 @@ import {
   generarRefreshToken,
   verificarRefreshToken,
 } from "../middlewares/auth.middleware.js";
-import { enviaremailActivacion } from "../services/resend.js";
+import { enviarEmailContacto } from "../services/resend.js";
 
 // REGISTRO de nuevo usuario
 export const register = async (req, res) => {

@@ -1,4 +1,4 @@
-import { enviarEmailContacto } from '../mailer.js'; // 👈 importa desde mailer
+import { enviarEmailContacto } from '../services/resend.js';
 
 export const crearContacto = async (req, res) => {
   try {
