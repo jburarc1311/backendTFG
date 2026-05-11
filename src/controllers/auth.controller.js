@@ -12,6 +12,9 @@ import { enviarEmailActivacion } from "../mailer.js";
 export const register = async (req, res) => {
   try {
     const { name, email, password, descripcion, ubicacion } = req.body;
+    
+    console.log("BODY REGISTER:", req.body);
+    
     // Hashea la contraseña de forma segura
     const saltRounds = 10;
     const hashPassword = await bcrypt.hash(password, saltRounds);
