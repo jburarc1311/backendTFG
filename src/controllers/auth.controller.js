@@ -6,7 +6,7 @@ import {
   generarRefreshToken,
   verificarRefreshToken,
 } from "../middlewares/auth.middleware.js";
-import { enviarEmailActivacion } from "../mailer.js";
+import { enviaremailActivacion } from "../services/emailService.js";
 
 // REGISTRO de nuevo usuario
 export const register = async (req, res) => {
@@ -36,18 +36,15 @@ export const register = async (req, res) => {
       activationTokenExpires,
     });
 
-    // Enviar email de activación
+    // Enviar email de activaciónv
     const urlActivacion = `${process.env.URL}/api/auth/activate/${activationToken}`;
     const htmlContent = contenidoHTML(email, name, urlActivacion);
+
     try {
-      await enviarEmailActivacion(email, "Activa tu cuenta", htmlContent);
+      await sendActivationEmail(email, urlActivacion, name);
       console.log("Email enviado correctamente");
-    } catch (emailError) {
-      console.warn(
-        "Error al enviar email, pero el usuario se registró:",
-        emailError.message,
-      );
-      // Continuamos aunque falle el email
+    } catch (err) {
+      console.log("Error enviando email:", err.message);
     }
 
     // Preparar payload para los tokens (SIN password)
@@ -112,10 +109,7 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: "No existe usuario" });
     }
 
-    const validPass = await bcrypt.compare(
-      req.body.password,
-      usuario.password
-    );
+    const validPass = await bcrypt.compare(req.body.password, usuario.password);
 
     if (!validPass) {
       return res.status(401).json({ message: "Contraseña incorrecta" });
@@ -151,7 +145,6 @@ export const login = async (req, res) => {
         },
       },
     });
-
   } catch (error) {
     console.error("LOGIN ERROR:", error);
     return res.status(500).json({ error: error.message });
