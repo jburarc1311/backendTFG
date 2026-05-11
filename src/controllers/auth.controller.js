@@ -180,7 +180,8 @@ export const login = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      message: "Error en el login",
+      message: "Error al iniciar sesión",
+      error: error.message,
     });
   }
 };
