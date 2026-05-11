@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs'
 import { Solicitud } from '../models/solicitud.model.js';
 import { Usuario } from '../models/usuarios.model.js';
 import { Perro } from '../models/perros.model.js';
-import { enviarEmailActivacion } from '../mailer.js';
+import { enviarEmailContacto } from '../services/resend.js';
 
 // CREAR solicitud de adopción
 export const addSolicitud = async (req, res) => {
@@ -61,7 +61,7 @@ export const addSolicitud = async (req, res) => {
     `;
 
     try {
-      await enviarEmailActivacion(emailPropietario, asunto, htmlContent);
+      await enviarEmailContacto({ nombre: propietario.name, motivo: asunto, mensaje: htmlContent });
       console.log('✅ Email de notificación enviado al propietario');
     } catch (emailError) {
       console.warn('⚠️ Error al enviar email, pero la solicitud se creó:', emailError.message);
