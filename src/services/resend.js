@@ -15,3 +15,17 @@ export const enviarEmailContacto = async ({ nombre, motivo, mensaje }) => {
     `,
   });
 };
+
+
+export const enviaremailActivacion = async (email, url, name) => {
+  return await resend.emails.send({
+    from: "onboarding@resend.dev",
+    to: email,
+    subject: "Activa tu cuenta",
+    html: `
+      <h1>Hola ${name}</h1>
+      <p>Activa tu cuenta aquí:</p>
+      <a href="${url}">${url}</a>
+    `,
+  });
+};
