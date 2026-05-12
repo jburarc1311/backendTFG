@@ -74,10 +74,10 @@ export const addAnimal = async (req, res) => {
     console.log("📸 Fotos capturadas:", fotos.length);
     console.log("📸 URLs de Cloudinary:", fotos);
 
-    // ❌ Validar que haya exactamente 4 fotos
-    if (fotos.length !== 4) {
+
+    if (!Array.isArray(fotos) || fotos.length < 1 || fotos.length > 5) {
       return res.status(400).json({
-        message: `Se requieren exactamente 4 fotos. Se recibieron: ${fotos.length}`,
+        message: `Se requieren entre 1 y 5 fotos. Se recibieron: ${fotos ? fotos.length : 0}`,
       });
     }
 
@@ -140,6 +140,13 @@ export const updateAnimal = async (req, res) => {
       ubicacion,
       creado_en,
     } = req.body;
+
+    // Si se envían fotos en la actualización, validar que haya entre 1 y 5
+    if (fotos && (!Array.isArray(fotos) || fotos.length < 1 || fotos.length > 5)) {
+      return res.status(400).json({
+        message: `Si se envía 'fotos', se requieren entre 1 y 5 fotos. Se recibieron: ${Array.isArray(fotos) ? fotos.length : 'no válido'}`,
+      });
+    }
     const { id } = req.params;
 
     // Verificar que el usuario existe
