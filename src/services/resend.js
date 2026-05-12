@@ -57,6 +57,57 @@ export const enviarEmailContacto = async ({ nombre, motivo, mensaje }) => {
   }
 };
 
+export const enviarEmailSolicitud = async ({
+  propietario,
+  adoptante,
+  perro,
+  mensaje,
+  emailDestino,
+}) => {
+  try {
+    const response = await resend.emails.send({
+      from: "AdoptMee <no-reply@adoptmee.site>",
+      to: emailDestino,
+      subject: `Nueva solicitud de adopción para ${perro}`,
+      html: emailShell({
+        eyebrow: "Solicitud recibida",
+        title: "Tienes una nueva solicitud de adopción",
+        body: `
+          <div style="background:#eff6ff;border:1px solid #dbeafe;border-radius:16px;padding:20px;margin-bottom:20px;">
+            <p style="margin:0 0 8px;font-size:13px;color:#2563eb;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">Detalles rápidos</p>
+            <p style="margin:0;font-size:14px;color:#1f2937;">Revisa la información de la persona interesada y responde desde tu panel.</p>
+          </div>
+
+          <div style="display:grid;gap:12px;">
+            <div style="padding:14px 16px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:14px;">
+              <p style="margin:0 0 6px;font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:0.08em;">Propietario</p>
+              <p style="margin:0;font-weight:700;color:#111827;">${propietario}</p>
+            </div>
+            <div style="padding:14px 16px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:14px;">
+              <p style="margin:0 0 6px;font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:0.08em;">Adoptante</p>
+              <p style="margin:0;font-weight:700;color:#111827;">${adoptante}</p>
+            </div>
+            <div style="padding:14px 16px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:14px;">
+              <p style="margin:0 0 6px;font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:0.08em;">Perro</p>
+              <p style="margin:0;font-weight:700;color:#111827;">${perro}</p>
+            </div>
+          </div>
+
+          <div style="margin-top:20px;padding:18px;border-left:4px solid #2563eb;background:#f8fafc;border-radius:12px;">
+            <p style="margin:0 0 8px;font-weight:700;color:#111827;">Mensaje del adoptante</p>
+            <p style="margin:0;white-space:pre-line;color:#374151;">${mensaje || "(Sin mensaje)"}</p>
+          </div>
+        `,
+      }),
+    });
+
+    return response;
+  } catch (error) {
+    console.error("ERROR RESEND SOLICITUD:", error);
+    throw error;
+  }
+};
+
 export const enviaremailActivacion = async (email, url, name) => {
   return await resend.emails.send({
     from: "AdoptMee <no-reply@adoptmee.site>",
