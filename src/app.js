@@ -27,7 +27,8 @@ const app = express();
 const corsOption = {
   origin: [
     "http://localhost:4200",
-    "https://frontendtfg-production-86fa.up.railway.app"
+    "https://frontendtfg-production-86fa.up.railway.app",
+    "https://adoptmee.site"
   ],
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
@@ -104,7 +105,7 @@ app.post("/chat", async (req, res) => {
       contents: SYSTEM_PROMPT + "\n\nUsuario: " + message,
     });
 
-    const reply = response.text || "No pude generar respuesta.";
+    const reply = response.text || "No puedo generar la respuesta.";
 
     res.json({ reply });
 
