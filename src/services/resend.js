@@ -30,7 +30,7 @@ export const enviarEmailContacto = async ({ nombre, motivo, mensaje }) => {
 
 export const enviaremailActivacion = async (email, url, name) => {
   return await resend.emails.send({
-    from: "onboarding@resend.dev",
+    from: "AdoptMee <no-reply@adoptmee.site>",
     to: email,
     subject: "Activa tu cuenta",
     html: `
