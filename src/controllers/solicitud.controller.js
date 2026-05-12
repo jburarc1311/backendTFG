@@ -214,21 +214,38 @@ export const rechazarSolicitud = async (req, res) => {
 export const aceptarSolicitud = async (req, res) => {
   try {
     const { id } = req.params;
+
+    const solicitud = await Solicitud.findById(id);
+    if (!solicitud) {
+      return res.status(404).json({
+        message: "Solicitud no encontrada",
+      });
+    }
+
+    const perroActualizado = await Perro.findByIdAndUpdate(
+      solicitud.perro_id,
+      { estado: "adoptado" },
+      { new: true, runValidators: true },
+    );
+
+    if (!perroActualizado) {
+      return res.status(404).json({
+        message: "Perro no encontrado",
+      });
+    }
+
     const solicitudAceptada = await Solicitud.findByIdAndUpdate(
       id,
       { estado: "Aceptada" },
       { new: true },
     );
 
-    if (!solicitudAceptada) {
-      return res.status(404).json({
-        message: "Solicitud no encontrada",
-      });
-    }
-
     res.status(200).json({
       message: "Solicitud aceptada exitosamente",
-      data: solicitudAceptada,
+      data: {
+        solicitud: solicitudAceptada,
+        perro: perroActualizado,
+      },
     });
   } catch (error) {
     console.error("Error al aceptar solicitud:", error);
