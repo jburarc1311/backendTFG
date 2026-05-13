@@ -28,7 +28,6 @@ export const Usuario = mongoose.model('Usuario', new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, 'La contraseña es requerida'],
     minlength: [8, 'La contraseña debe tener al menos 8 caracteres'],
     maxlength: [255]
   },
@@ -75,6 +74,11 @@ export const Usuario = mongoose.model('Usuario', new mongoose.Schema({
     type: Date,
     default: Date.now
   },
+  googleId: {
+    type: String,
+    unique: true,
+    sparse: true //permite que no falle si está vacío
+  }
 },
   {
     timestamps: false,

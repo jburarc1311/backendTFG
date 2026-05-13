@@ -7,6 +7,9 @@ import {
   verificarRefreshToken,
 } from "../middlewares/auth.middleware.js";
 import {enviarEmailContacto,enviaremailActivacion,} from "../services/resend.js";
+import client from '../config/google.js';
+import jwt from 'jsonwebtoken';
+
 
 // REGISTRO de nuevo usuario
 export const register = async (req, res) => {
@@ -346,5 +349,57 @@ export const activaCuenta = async (req, res) => {
       </body>
       </html>
     `);
+  }
+};
+
+
+export const googleLogin = async (req, res) => {
+
+  try {
+
+    const { token } = req.body;
+
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
+
+    const payload = ticket.getPayload();
+
+    const { sub, email, name, picture } = payload;
+
+    // buscar usuario
+    let user = await Usuario.findOne({ email });
+
+    // crear si no existe
+    if (!user) {
+      user = await Usuario.create({
+        name,
+        email,
+        photo: picture,
+        googleId: sub,
+        active: true
+      });
+    }
+
+    // crear JWT propio
+    const jwtToken = jwt.sign(
+      { id: user._id },
+      process.env.SECRET_KEY,
+      { expiresIn: '7d' }
+    );
+
+    return res.json({
+      ok: true,
+      token: jwtToken,
+      user
+    });
+
+  } catch (error) {
+    console.log(error);
+    return res.status(401).json({
+      ok: false,
+      msg: 'Token inválido'
+    });
   }
 };
