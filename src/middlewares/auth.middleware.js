@@ -1,5 +1,3 @@
-//Todo lo relativo al JWT
-
 import jwt from "jsonwebtoken";
 import { SECRET_KEY, REFRESH_SECRET_KEY } from "../config.js";
 
