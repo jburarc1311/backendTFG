@@ -11,7 +11,7 @@ router.post('/register', validarRegistro, register);
 router.post('/login', validarLogin, login);
 router.get('/auth/activate/:token', activaCuenta);
 router.post('/refresh-token', refreshToken);
-router.post('google', googleLogin);
+router.post('/google', googleLogin);
 
 
 

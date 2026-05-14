@@ -26,7 +26,6 @@ router.put(
 );
 router.get("/favoritos/:id", verFavoritos);
 router.get("/misanimales/:id", misanimales);
-router.get("/usuario/:id", getUsuario);
 router.get("/:id", getUsuario);
 router.put("/:id", updateUsuario);
 router.delete("/:id", delUsuario);
