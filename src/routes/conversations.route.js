@@ -8,7 +8,6 @@ import {
 import {
   getMessages,
   createMessage,
-  deleteMessage,
 } from "../controllers/messages.controller.js";
 
 const router = express.Router();
