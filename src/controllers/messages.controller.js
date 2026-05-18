@@ -37,8 +37,9 @@ export const createMessage = async (req, res) => {
     }
 
     const senderObjectId = new mongoose.Types.ObjectId(senderId);
-    const participant1 = conversation.participant1.toString();
-    const participant2 = conversation.participant2.toString();
+    // Obtener participantes desde conversation.participants (array normalizado)
+    const participant1 = conversation.participants[0].toString();
+    const participant2 = conversation.participants[1].toString();
 
     if (![participant1, participant2].includes(senderObjectId.toString())) {
       return res
@@ -46,19 +47,21 @@ export const createMessage = async (req, res) => {
         .json({ message: "No perteneces a esta conversación" });
     }
 
+
     const receiverId =
       senderObjectId.toString() === participant1
-        ? conversation.participant2
-        : conversation.participant1;
+        ? conversation.participants[1]
+        : conversation.participants[0];
 
+    // Crear mensaje asociado a la conversación
     const msg = await Message.create({
-      participant1: conversation.participant1,
-      participant2: conversation.participant2,
+      conversationId: conversationId,
       sender: senderObjectId,
       receiver: receiverId,
       body,
     });
 
+    // Actualizar la conversación: añadir el mensaje y actualizar lastMessage
     await Conversation.findByIdAndUpdate(conversationId, {
       $push: { messages: msg._id },
       lastMessage: msg._id,
@@ -91,17 +94,8 @@ export const deleteMessage = async (req, res) => {
       return res.status(404).json({ message: "Mensaje no encontrado" });
     }
 
-    const inConversation =
-      message.participant1.toString() ===
-        conversation.participant1.toString() &&
-      message.participant2.toString() === conversation.participant2.toString();
-
-    const inReverseConversation =
-      message.participant1.toString() ===
-        conversation.participant2.toString() &&
-      message.participant2.toString() === conversation.participant1.toString();
-
-    if (!inConversation && !inReverseConversation) {
+    // Comprobar que el mensaje pertenece a la conversación indicada
+    if (!message.conversationId || message.conversationId.toString() !== conversationId) {
       return res
         .status(403)
         .json({ message: "El mensaje no pertenece a esta conversación" });
@@ -124,9 +118,9 @@ export const deleteMessage = async (req, res) => {
     };
 
     if (conversation.lastMessage?.toString() === messageId.toString()) {
+
       const previousMessage = await Message.findOne({
-        participant1: conversation.participant1,
-        participant2: conversation.participant2,
+        conversationId: conversationId,
         _id: { $ne: messageId },
       })
         .sort({ createdAt: -1 })

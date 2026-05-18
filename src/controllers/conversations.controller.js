@@ -11,23 +11,19 @@ export const createOrGetConversation = async (req, res) => {
         .json({ message: "Se requieren dos participantes" });
     }
 
-    const [firstParticipant, secondParticipant] = [
+    // Normalizar y ordenar los ids para evitar duplicados inversos
+    const participants = [
       new mongoose.Types.ObjectId(participant1),
       new mongoose.Types.ObjectId(participant2),
     ].sort((a, b) => a.toString().localeCompare(b.toString()));
 
-    const existing = await Conversation.findOne({
-      $or: [
-        { participant1: firstParticipant, participant2: secondParticipant },
-        { participant1: secondParticipant, participant2: firstParticipant },
-      ],
-    });
+    // Buscar conversación existente por array exacto de participantes
+    const existing = await Conversation.findOne({ participants });
 
     if (existing) return res.json(existing);
 
     const conv = await Conversation.create({
-      participant1: firstParticipant,
-      participant2: secondParticipant,
+      participants,
       messages: [],
       lastMessage: null,
       lastMessageAt: null,
@@ -44,11 +40,8 @@ export const listConversations = async (req, res) => {
     const userId = req.user?.id || req.query.user;
     if (!userId) return res.status(400).json({ message: "Falta user id" });
 
-    const convs = await Conversation.find({
-      $or: [{ participant1: userId }, { participant2: userId }],
-    })
-      .populate({ path: "participant1", select: "name photo" })
-      .populate({ path: "participant2", select: "name photo" })
+    const convs = await Conversation.find({ participants: userId })
+      .populate({ path: "participants", select: "name photo" })
       .populate({ path: "lastMessage", populate: { path: "sender", select: "name photo" } })
       .sort({ lastMessageAt: -1, createdAt: -1 })
       .lean();
@@ -71,8 +64,7 @@ export const getConversation = async (req, res) => {
           { path: "receiver", select: "name photo" },
         ],
       })
-      .populate({ path: "participant1", select: "name photo" })
-      .populate({ path: "participant2", select: "name photo" })
+      .populate({ path: "participants", select: "name photo" })
       .populate({ path: "lastMessage", populate: { path: "sender", select: "name photo" } })
       .lean();
     if (!conv)

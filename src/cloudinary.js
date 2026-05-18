@@ -1,32 +1,23 @@
-import dotenv from "dotenv";
-dotenv.config(); // ✅ Asegurar que dotenv esté cargado AQUÍ también
+import dotenv from "dotenv"; //carga variables
+dotenv.config();
 
-import { v2 as cloudinary } from "cloudinary";
-import { CloudinaryStorage } from "multer-storage-cloudinary";
-import multer from "multer";
+import { v2 as cloudinary } from "cloudinary"; //importo la libreria de Cloudinary 2 y la renombro como cloudinary para usar en el código
+import { CloudinaryStorage } from "multer-storage-cloudinary"; //permite que el multer guarde directamnete en cloudinary
+import multer from "multer"; //intercepta y gestiona archivos subidos desde formularios
 
 // Configurar Cloudinary con credenciales del .env
-cloudinary.config({
+cloudinary.config({ //sin esto cloudinary no sabria a que cuanta subir las cosas
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-console.log("☁️  Cloudinary configurado:");
-console.log("   - Cloud Name:", process.env.CLOUDINARY_CLOUD_NAME);
-console.log(
-  "   - API Key:",
-  process.env.CLOUDINARY_API_KEY ? "✓ Presente" : "✗ Falta"
-);
-console.log(
-  "   - API Secret:",
-  process.env.CLOUDINARY_API_SECRET ? "✓ Presente" : "✗ Falta"
-);
+console.log("Cloudinary configurado");
 
 // Configurar almacenamiento en Cloudinary
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: async (req, file) => {
+const storage = new CloudinaryStorage({ //le digo al multer donde y como guardar los archivos
+  cloudinary, 
+  params: async (req, file) => { 
     return {
       folder: "adopt-me/animales", // Carpeta en Cloudinary
       format: "jpg", // Convertir a JPG automáticamente
@@ -41,6 +32,6 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB máximo
 });
 
-console.log("✅ Multer configurado con CloudinaryStorage");
+console.log("Multer configurado");
 
 export { cloudinary, upload };

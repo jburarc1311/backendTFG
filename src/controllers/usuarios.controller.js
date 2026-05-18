@@ -2,10 +2,10 @@ import bcrypt from "bcryptjs";
 import { Usuario } from "../models/usuarios.model.js";
 import { Perro } from "../models/perros.model.js";
 
-export const getUsuarios = async (req, res) => {
+export const getUsuarios = async (req, res) => { //devulve todos los usuarios
   try {
     console.log("pasa");
-    const usuarios = await Usuario.find(); //orden ascendente -1 descendente
+    const usuarios = await Usuario.find();
 
     res.status(200).json({ data: usuarios.length ? usuarios : [] });
   } catch (error) {

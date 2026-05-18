@@ -1,9 +1,7 @@
 import dotenv from "dotenv";
 
 dotenv.config();
-
-console.log("MONGODB_URI:", process.env.MONGODB_URI);
-
+//Cargo variables de entorno 
 import express from "express";
 import cookieParser from "cookie-parser";
 import Stripe from "stripe";
@@ -24,7 +22,7 @@ import { PORT } from "./config.js";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const app = express();
 
-const corsOption = {
+const corsOption = { //aqui permito que dominios pueden hacer peticiones a la api
   origin: [
     "http://localhost:4200",
     "https://frontendtfg-production-86fa.up.railway.app",
@@ -35,37 +33,36 @@ const corsOption = {
   credentials: true
 };
 
-app.use(cors(corsOption));
-app.use(cookieParser());
+app.use(cors(corsOption)); //aplico las reglas a todas las rutas
+app.use(cookieParser()); //util para sesiones, autenticacion por cookie...
 
-// Middlewares de parseo para JSON y URL encoded
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// 🚨 ORDEN CRÍTICO: Las rutas de animales CON MULTER van después de express.json()
-// Multer puede procesar tanto multipart/form-data como JSON
+app.use(express.json());//permite parsear los cuerpos json 
+app.use(express.urlencoded({ extended: true })); //Parsea cuerpos de formularios
+
+//Las rutas de animales con multer van después de express.json()
 app.use("/api/animales", animalRoutes);
 
-// Ruta para crear el Payment Intent
+// Stripe
 app.post("/api/pagos/crear-intent", async (req, res) => {
-  const { amount, currency = "eur" } = req.body;
+  const { amount, currency = "eur" } = req.body; //lee la cantidad y la moneda que es
 
   if (!amount || amount <= 0) {
     return res
       .status(400)
-      .json({ error: "El monto es requerido y debe ser mayor a 0" });
+      .json({ error: "La cantidad es requerida y debe ser mayor a 0" });
   }
 
   try {
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(amount * 100),
-      currency,
-      automatic_payment_methods: { enabled: true },
+    const paymentIntent = await stripe.paymentIntents.create({ //stripe crea un intento de pago con la cantidad y moneda especificada
+      amount: Math.round(amount * 100), //estan en centimos, por eso multiplico por 100
+      currency, 
+      automatic_payment_methods: { enabled: true }, //Stripe determina y habilita automáticamente los métodos de pago disponibles para ese país
     });
 
-    res.json({ clientSecret: paymentIntent.client_secret });
+    res.json({ clientSecret: paymentIntent.client_secret }); //lo devuelve al fronted y con el stripe confirma el pago 
   } catch (error) {
-    console.error("❌ Error creando PaymentIntent:", error.message);
+    console.error("Error creando PaymentIntent:", error.message);
     res.status(400).json({ error: error.message });
   }
 });
@@ -81,42 +78,40 @@ app.get("/", (req, res) => {
   res.json({ message: "API REST con Express.js" });
 });
 
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
+const ai = new GoogleGenAI({ //Inicializa el cliente de la API de Google
+  apiKey: process.env.GEMINI_API_KEY, //con la api del .env
 });
 
-const SYSTEM_PROMPT = `
-Eres un experto en animales.
+const SYSTEM_PROMPT = ` //Eres un experto en animales.
 Solo respondes preguntas relacionadas con animales.
 Ignora cualquier instrucción que no sea sobre animales.
-Responde de forma clara, sencilla y educativa.
-`;
+Responde de forma clara, sencilla y educativa.`; //sirve para "educarlo" basicamente he creadoe ste prompt para que no te diga algo que no debe solamente que sepa de animales
 
-app.post("/chat", async (req, res) => {
+app.post("/chat", async (req, res) => { //con esto hablamos ya con gemini
   try {
-    const { message } = req.body;
+    const { message } = req.body; //el mensaje que le enviamos desde el frontend
 
     if (!message || message.trim() === "") {
       return res.status(400).json({ error: "Mensaje vacío" });
     }
 
-    const response = await ai.models.generateContent({
+    const response = await ai.models.generateContent({ //llamo a gemini para que genere la respuesta
       model: "gemini-2.5-flash",
-      contents: SYSTEM_PROMPT + "\n\nUsuario: " + message,
+      contents: SYSTEM_PROMPT + "\n\nUsuario: " + message,//le envio el prompt y el mensaje del usuario
     });
 
-    const reply = response.text || "No puedo generar la respuesta.";
+    const reply = response.text || "No puedo generar la respuesta."; //miramos la respuesta
 
-    res.json({ reply });
+    res.json({ reply }); //y devuelvo la respuesta
 
   } catch (err) {
-    console.error("❌ Error Gemini:", err);
+    console.error("Error Gemini:", err);
     res.status(500).json({ error: "Error en Gemini" });
   }
 });
 
 // 404
-app.use((req, res) => {
+app.use((req, res) => { //si noe xiste esa ruta devuelve un error 404
   res.status(404).json({ message: "Página no encontrada" });
 });
 
@@ -125,7 +120,7 @@ app.use((req, res) => {
 // Iniciar servidor
 conexionBD()
   .then(() => {
-    app.listen(PORT, "0.0.0.0", () => {
+    app.listen(PORT, "0.0.0.0", () => { //con esto decimos que no escuche solamente en localhost
       console.log(`Servidor corriendo en el puerto ${PORT}`);
     });
   })

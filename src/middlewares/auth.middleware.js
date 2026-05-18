@@ -1,25 +1,25 @@
-import jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken"; // importa la librería jsonwebtoken se usa para crear, firmar y verificar JSON Web Tokens
 import { SECRET_KEY, REFRESH_SECRET_KEY } from "../config.js";
 
 // Tiempo de expiración de tokens
-export const ACCESS_TOKEN_EXPIRY = "60m"; // 5-15 minutos
+export const ACCESS_TOKEN_EXPIRY = "20m"; // 20 minutos
 export const REFRESH_TOKEN_EXPIRY = "7d"; // 7 días
 
 // Generar Access Token
-export const generarAccessToken = (payload) => {
+export const generarAccessToken = (payload) => { // crea el token de acceso
   return jwt.sign(payload, SECRET_KEY, { expiresIn: ACCESS_TOKEN_EXPIRY });
-};
+}; //payload es el usuario y lo firma con la secret_key que expira en 20 minutos
 
 // Generar Refresh Token
 export const generarRefreshToken = (payload) => {
-  return jwt.sign(payload, REFRESH_SECRET_KEY, {
-    expiresIn: REFRESH_TOKEN_EXPIRY,
+  return jwt.sign(payload, REFRESH_SECRET_KEY, { // el usuario se firma con la REFRESH_SECRET_KEY
+    expiresIn: REFRESH_TOKEN_EXPIRY, //sólo se usa para solicitar un nuevo access token
   });
 };
 
 // Verificar token
-export const autenticarToken = (req, res, next) => {
-  const authHeader = req.headers["authorization"];
+export const autenticarToken = (req, res, next) => { //el cliente envia el token y este lo valida para permitir el acceso a la ruta
+  const authHeader = req.headers["authorization"]; //lee la cabezera
 
   console.log(
     " Authorization Header:",
@@ -31,7 +31,7 @@ export const autenticarToken = (req, res, next) => {
     return res.status(403).json({ message: "Token no proporcionado" });
   }
 
-  const token = authHeader.split(" ")[1];
+  const token = authHeader.split(" ")[1]; // extrae el token que esta en formato bearer
 
   if (!token) {
     console.log(" Token vacío o formato incorrecto");
@@ -40,7 +40,7 @@ export const autenticarToken = (req, res, next) => {
 
   console.log(" Verificando token con SECRET_KEY...");
 
-  jwt.verify(token, SECRET_KEY, (err, usuario) => {
+  jwt.verify(token, SECRET_KEY, (err, usuario) => { //verifico la firma y la expiración del token
     if (err) {
       console.log(" Token inválido o expirado:", err.message);
       return res
@@ -74,3 +74,4 @@ export const autorizarRol = (rolesPermitidos) => {
     next();
   };
 };
+      

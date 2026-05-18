@@ -1,9 +1,9 @@
-import { Resend } from "resend";
+import { Resend } from "resend";//Importa la librería 
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const emailShell = ({ title, eyebrow, body }) => `
-  <div style="margin:0;padding:0;background:#f4f7fb;font-family:Arial,Helvetica,sans-serif;color:#1f2937;">
+const emailShell = ({ title, eyebrow, body }) => // plantilla de email reutilizable
+  `<div style="margin:0;padding:0;background:#f4f7fb;font-family:Arial,Helvetica,sans-serif;color:#1f2937;">
     <div style="max-width:640px;margin:0 auto;padding:32px 16px;">
       <div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:20px;overflow:hidden;box-shadow:0 12px 32px rgba(15,23,42,0.08);">
         <div style="background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%);padding:28px 32px;color:#ffffff;">
@@ -18,16 +18,15 @@ const emailShell = ({ title, eyebrow, body }) => `
         AdoptMee · Gestión de adopciones y contacto
       </p>
     </div>
-  </div>
-`;
+  </div>`;
 
 export const enviarEmailContacto = async ({ nombre, motivo, mensaje }) => {
   try {
-    const response = await resend.emails.send({
-      from: "AdoptMee <no-reply@adoptmee.site>",
-      to: "joseab078@gmail.com",
+    const response = await resend.emails.send({ //enviamos el email
+      from: "AdoptMee <no-reply@adoptmee.site>", //en from ponemos esto que es grcias a el dominio que me he comprado
+      to: "joseab078@gmail.com", //a mi correo personal para que me llegue la notificación gracias a eso
       subject: `Contacto: ${motivo}`,
-      html: emailShell({
+      html: emailShell({ //uso esta plantilla
         eyebrow: "Nuevo mensaje",
         title: "Has recibido un mensaje de contacto",
         body: `
@@ -46,9 +45,6 @@ export const enviarEmailContacto = async ({ nombre, motivo, mensaje }) => {
         `,
       }),
     });
-
-    console.log("RESEND RESPONSE:", response);
-
     return response;
   } catch (error) {
     console.error("ERROR RESEND:", error);

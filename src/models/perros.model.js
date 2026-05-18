@@ -5,31 +5,31 @@ export const Perro = mongoose.model(
   "Perro",
   new mongoose.Schema(
     {
-      nombre: {
+      nombre: { // nombre del animal
         type: String,
         required: [true, "El nombre del perro es obligatorio"],
         trim: true,
       },
-      raza: {
+      raza: { // raza del animal
         type: String,
         trim: true,
         default: "Desconocida",
       },
-      edad: {
+      edad: { // edad del animal
         type: Number, // en meses
         required: [true, "La edad es obligatoria"],
         min: [0, "La edad no puede ser negativa"],
         max: [20, "La edad no puede ser mayor a 20 años"],
       },
-      tamano: {
+      tamano: { // tamaño del animal
         type: String,
         enum: {
           values: ["pequeño", "mediano", "grande"],
           message: "El tamano debe ser: pequeño, mediano o grande",
         },
         required: [true, "El tamano es obligatorio"],
-      },
-      sexo: {
+      }, 
+      sexo: { //sexo del animal
         type: String,
         enum: {
           values: ["macho", "hembra"],
@@ -37,29 +37,29 @@ export const Perro = mongoose.model(
         },
         required: [true, "El sexo es obligatorio"],
       },
-      descripcion: {
+      descripcion: { // descripcion del animal
         type: String,
         trim: true,
         default: "",
       },
-      historia: {
+      historia: { // historia del animal
         type: String,
         trim: true,
         default: "",
-      },
-      fotos: {
+      }, 
+      fotos: { // fotos del animal
         type: [String], // array de URLs
         default: [],
       },
-      vacunado: {
+      vacunado: { // atributo vacunado
         type: Boolean,
         default: false,
       },
-      esterilizado: {
+      esterilizado: { // atributo esterilizado
         type: Boolean,
         default: false,
       },
-      estado: {
+      estado: { // estado del animal
         type: String,
         enum: {
           values: ["disponible", "en proceso", "adoptado"],
@@ -67,26 +67,26 @@ export const Perro = mongoose.model(
         },
         default: "disponible",
       },
-      megustas: {
+      megustas: { // cantidad de megustas del animal
         type: [mongoose.Schema.Types.ObjectId],
         ref: "Usuario",
         default: [],
       },
-      tipo: {
+      tipo: { //ripo del animal
         type: String,
         required: [true, "El tipo de animal es obligatorio"],
       },
-      propietario_id: {
+      propietario_id: { // propietario del animal
         type: mongoose.Schema.Types.ObjectId,
         ref: "Usuario",
         required: [true, "El propietario es obligatorio"],
       },
-      ubicacion:{
+      ubicacion:{ //ubicacion del animal
         type:String,
         trim: true,
         default: "",
       },
-      creado_en: {
+      creado_en: { // fecha de creación del animal
         type: Date,
         default: Date.now,
       },

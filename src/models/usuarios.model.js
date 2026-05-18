@@ -1,16 +1,16 @@
 // models/Alumno.js
 import mongoose from 'mongoose';
 
-export const Usuario = mongoose.model('Usuario', new mongoose.Schema({
+export const Usuario = mongoose.model('Usuario', new mongoose.Schema({ //nueva tabla usuarios
 
-  name: {
+  name: { //atributo nombre
     type: String,
     required: [true, 'El nombre es requerido'],
     minlength: [3, 'El nombre debe tener al menos 3 caracteres'],
     maxlength: [100, 'El nombre debe tener como máximo 100 caracteres'],
     trim: true
   },
-  email: {
+  email: { //atributo email
     type: String,
     required: [true, 'El email es requerido'],
     unique: true,
@@ -18,7 +18,7 @@ export const Usuario = mongoose.model('Usuario', new mongoose.Schema({
     trim: true,
     match: [/^\S+@\S+\.\S+$/, 'Debe proporcionar un email válido']
   },
-  descripcion: {
+  descripcion: { //atributo descripcion
     type: String,
     required: [true, 'La descripción es requerida'],
     minlength: [10, 'La descripción debe tener al menos 10 caracteres'],
@@ -26,12 +26,13 @@ export const Usuario = mongoose.model('Usuario', new mongoose.Schema({
     trim: true,
     default: ''
   },
-  password: {
+  password: { //atributo password
+    required: [true, 'La contraseña es requerida'],
     type: String,
     minlength: [8, 'La contraseña debe tener al menos 8 caracteres'],
     maxlength: [255]
   },
-  role: {
+  role: { //atributo role
     type: String,
     enum: {
       values: ['Admin', 'Usuario'],
@@ -40,41 +41,41 @@ export const Usuario = mongoose.model('Usuario', new mongoose.Schema({
     default: 'Usuario',
     required: true
   },
-  active: {
+  active: { //atributo activo
     type: Boolean,
     default: false
   },
-  photo:{ 
+  photo:{  //atributo foto
     type: String, 
     default: '' 
   },
-  ubicacion: {
+  ubicacion: { //atributo ubicacion
     type: String,
     default: ''
   },
-  animales: {
+  animales: { //atributo animales que tiene subidos
       type: [mongoose.Schema.Types.ObjectId],
       default: [],
       ref: 'animales',
   },
-  favoritos: {
+  favoritos: { //atributo favoritos que tiene
     type: [mongoose.Schema.Types.ObjectId],
     default: [],
     ref: 'animales',
   },
-  activationToken: {
+  activationToken: { //atributo token de activación para email de activar cuenta
     type: String,
     default: null
   },
-  activationTokenExpires: {
+  activationTokenExpires: { //atributo fecha de expiración del token de activación
     type: Date,
     default: null
   },
-  creado_en: {
+  creado_en: { //atributo fecha de creación del usuario
     type: Date,
     default: Date.now
   },
-  googleId: {
+  googleId: { //Es el ID que devuelve Google en un login OAuth. Se guarda para identificar usuarios que usan iniciar sesion con Google y evitar duplicados.
     type: String,
     unique: true,
     sparse: true //permite que no falle si está vacío

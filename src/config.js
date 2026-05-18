@@ -1,4 +1,4 @@
-import {config} from 'dotenv'
+import {config} from 'dotenv' //carga las variables
 
 config(); //leer las variables de entorno
  

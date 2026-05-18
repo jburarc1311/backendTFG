@@ -7,7 +7,6 @@ import { GOOGLE_CLIENT_ID } from '../config.js';
 
 const router = Router()
 
-// Rutas públicas (sin autenticación)
 router.post('/register', validarRegistro, register);
 router.post('/login', validarLogin, login);
 router.get('/auth/activate/:token', activaCuenta);
