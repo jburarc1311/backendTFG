@@ -4,10 +4,10 @@ import mongoose from "mongoose";
 
 export const getMessages = async (req, res) => {
   try {
-    const { conversationId } = req.params;
-    const conversation = await Conversation.findById(conversationId)
-      .populate("messages")
-      .lean();
+    const { conversationId } = req.params; //id de la conversacion
+    const conversation = await Conversation.findById(conversationId) // la busca
+      .populate("messages") // sustituye el array de mensajes por los datos de cada mensaje
+      .lean(); //lo devuelve
 
     if (!conversation) {
       return res.status(404).json({ message: "Conversación no encontrada" });
@@ -22,7 +22,7 @@ export const getMessages = async (req, res) => {
 
 export const createMessage = async (req, res) => {
   try {
-    const { conversationId } = req.params;
+    const { conversationId } = req.params; // id de la conversacion
     const senderId = req.user?.id || req.body.sender;
     const { body } = req.body;
 
@@ -30,10 +30,18 @@ export const createMessage = async (req, res) => {
       return res
         .status(400)
         .json({ message: "El mensaje no puede estar vacío" });
+    if (!mongoose.Types.ObjectId.isValid(conversationId)) {
+      return res.status(400).json({ message: "ID de conversación no válido" });
+    }
 
     const conversation = await Conversation.findById(conversationId);
     if (!conversation) {
       return res.status(404).json({ message: "Conversación no encontrada" });
+    }
+
+    // Asegurarse de que la conversación tiene al menos dos participantes
+    if (!Array.isArray(conversation.participants) || conversation.participants.length < 2) {
+      return res.status(400).json({ message: "Conversación inválida: participantes insuficientes" });
     }
 
     const senderObjectId = new mongoose.Types.ObjectId(senderId);
@@ -41,7 +49,7 @@ export const createMessage = async (req, res) => {
     const participant1 = conversation.participants[0].toString();
     const participant2 = conversation.participants[1].toString();
 
-    if (![participant1, participant2].includes(senderObjectId.toString())) {
+    if (!mongoose.Types.ObjectId.isValid(senderId) || ![participant1, participant2].includes(senderObjectId.toString())) {
       return res
         .status(403)
         .json({ message: "No perteneces a esta conversación" });
@@ -61,82 +69,23 @@ export const createMessage = async (req, res) => {
       body,
     });
 
-    // Actualizar la conversación: añadir el mensaje y actualizar lastMessage
+    // Actualizar la conversación: añadir el mensaje y actualizar lastMessage y su fecha
     await Conversation.findByIdAndUpdate(conversationId, {
       $push: { messages: msg._id },
       lastMessage: msg._id,
       lastMessageAt: msg.createdAt,
     });
 
-    return res.status(201).json(msg);
+    // Devolver el mensaje poblado para que el cliente tenga datos de usuario
+    const populated = await Message.findById(msg._id)
+      .populate('sender', 'name photo')
+      .populate('receiver', 'name photo')
+      .lean();
+
+    return res.status(201).json(populated);
   } catch (error) {
     console.error("createMessage error:", error.message);
     return res.status(500).json({ message: error.message });
   }
 };
 
-export const deleteMessage = async (req, res) => {
-  try {
-    const { conversationId, messageId } = req.params;
-    const userId = req.user?.id;
-
-    if (!userId) {
-      return res.status(401).json({ message: "No autenticado" });
-    }
-
-    const conversation = await Conversation.findById(conversationId);
-    if (!conversation) {
-      return res.status(404).json({ message: "Conversación no encontrada" });
-    }
-
-    const message = await Message.findById(messageId);
-    if (!message) {
-      return res.status(404).json({ message: "Mensaje no encontrado" });
-    }
-
-    // Comprobar que el mensaje pertenece a la conversación indicada
-    if (!message.conversationId || message.conversationId.toString() !== conversationId) {
-      return res
-        .status(403)
-        .json({ message: "El mensaje no pertenece a esta conversación" });
-    }
-
-    if (message.sender.toString() !== userId.toString()) {
-      return res
-        .status(403)
-        .json({ message: "Solo puedes eliminar tus propios mensajes" });
-    }
-
-    await Message.findByIdAndDelete(messageId);
-
-    const updatedMessages = (conversation.messages || []).filter(
-      (id) => id.toString() !== messageId.toString(),
-    );
-
-    const updatePayload = {
-      messages: updatedMessages,
-    };
-
-    if (conversation.lastMessage?.toString() === messageId.toString()) {
-
-      const previousMessage = await Message.findOne({
-        conversationId: conversationId,
-        _id: { $ne: messageId },
-      })
-        .sort({ createdAt: -1 })
-        .lean();
-
-      updatePayload.lastMessage = previousMessage ? previousMessage._id : null;
-      updatePayload.lastMessageAt = previousMessage
-        ? previousMessage.createdAt
-        : null;
-    }
-
-    await Conversation.findByIdAndUpdate(conversationId, updatePayload);
-
-    return res.json({ message: "Mensaje eliminado correctamente" });
-  } catch (error) {
-    console.error("deleteMessage error:", error.message);
-    return res.status(500).json({ message: error.message });
-  }
-};

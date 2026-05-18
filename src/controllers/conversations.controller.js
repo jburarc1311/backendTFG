@@ -11,7 +11,7 @@ export const createOrGetConversation = async (req, res) => {
         .json({ message: "Se requieren dos participantes" });
     }
 
-    // Normalizar y ordenar los ids para evitar duplicados inversos
+    // Normalizar y ordenar los ids para evitar duplicados
     const participants = [
       new mongoose.Types.ObjectId(participant1),
       new mongoose.Types.ObjectId(participant2),
@@ -20,9 +20,9 @@ export const createOrGetConversation = async (req, res) => {
     // Buscar conversación existente por array exacto de participantes
     const existing = await Conversation.findOne({ participants });
 
-    if (existing) return res.json(existing);
+    if (existing) return res.json(existing); // Si ya existe, devuelve la conversación
 
-    const conv = await Conversation.create({
+    const conv = await Conversation.create({ // Si no existe, crea una nueva conversación
       participants,
       messages: [],
       lastMessage: null,
@@ -37,10 +37,10 @@ export const createOrGetConversation = async (req, res) => {
 
 export const listConversations = async (req, res) => {
   try {
-    const userId = req.user?.id || req.query.user;
+    const userId = req.user?.id || req.query.user; // Saca el ID del usuario desde req.user si no intenta cogerlo desde la query
     if (!userId) return res.status(400).json({ message: "Falta user id" });
 
-    const convs = await Conversation.find({ participants: userId })
+    const convs = await Conversation.find({ participants: userId }) // busca todas la conversaciones donde este aparece de participante
       .populate({ path: "participants", select: "name photo" })
       .populate({ path: "lastMessage", populate: { path: "sender", select: "name photo" } })
       .sort({ lastMessageAt: -1, createdAt: -1 })
@@ -55,17 +55,17 @@ export const listConversations = async (req, res) => {
 
 export const getConversation = async (req, res) => {
   try {
-    const { id } = req.params;
-    const conv = await Conversation.findById(id)
+    const { id } = req.params; // id de la conversacion
+    const conv = await Conversation.findById(id) //busca la conversacion 
       .populate({
-        path: "messages",
+        path: "messages", // rellena el array de mensajes con los datos de cada mensaje
         populate: [
           { path: "sender", select: "name photo" },
           { path: "receiver", select: "name photo" },
         ],
       })
-      .populate({ path: "participants", select: "name photo" })
-      .populate({ path: "lastMessage", populate: { path: "sender", select: "name photo" } })
+      .populate({ path: "participants", select: "name photo" }) // Rellena los participantes de la conversación 
+      .populate({ path: "lastMessage", populate: { path: "sender", select: "name photo" } }) // rellena el último mensaje
       .lean();
     if (!conv)
       return res.status(404).json({ message: "Conversación no encontrada" });
