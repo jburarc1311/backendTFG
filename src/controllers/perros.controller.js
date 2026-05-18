@@ -3,12 +3,11 @@ import mongoose from "mongoose";
 import { Perro } from "../models/perros.model.js";
 import { Usuario } from "../models/usuarios.model.js";
 
-export const getAnimales = async (req, res) => {
+export const getAnimales = async (req, res) => { //nos devuelve todos los animales
   try {
-    console.log("pasa");
     const perros = await Perro.find().sort({ nombre: 1 }); //orden ascendente -1 descendente
 
-    res.status(200).json({ data: perros.length ? perros : [] });
+    res.status(200).json({ data: perros.length ? perros : [] }); // nos devuelve el array
   } catch (error) {
     res
       .status(500)
@@ -16,15 +15,15 @@ export const getAnimales = async (req, res) => {
   }
 };
 
-export const getAnimal = async (req, res) => {
+export const getAnimal = async (req, res) => { // nos devuelve un animal por el id
   try {
-    const { id } = req.params;
-    const perro = await Perro.findById(id);
+    const { id } = req.params; //leemos el id
+    const perro = await Perro.findById(id); //buscamos por el id
 
     if (!perro)
       return res.status(404).json({ message: "Animal no encontrado" });
 
-    res.status(200).json({ data: perro });
+    res.status(200).json({ data: perro }); // nos lo devuelve
   } catch (error) {
     res
       .status(500)
@@ -32,9 +31,9 @@ export const getAnimal = async (req, res) => {
   }
 };
 
-export const addAnimal = async (req, res) => {
+export const addAnimal = async (req, res) => { //añadimos el animal
   try {
-    console.log("req.body recibido:", req.body);
+    console.log("req.body recibido:", req.body); //lo pasamos todo por body
 
     const {
       nombre,
@@ -52,13 +51,13 @@ export const addAnimal = async (req, res) => {
       megustas,
     } = req.body;
 
-    const propietario = await Usuario.findById(propietario_id).select("ubicacion");
+    const propietario = await Usuario.findById(propietario_id).select("ubicacion"); //le cogemos la ubi del usuario para guardarla en el animal
 
     if (!propietario) {
       return res.status(404).json({ message: "Propietario no encontrado" });
     }
 
-    // 🖼️  Obtener URLs de fotos desde Cloudinary
+    // Obtener URLs de fotos desde Cloudinary
     // Con upload.fields(), los archivos están en req.files.fotos
     // Cloudinary procesa cada archivo y devuelve .path (URL pública)
     // Ejemplo: "https://res.cloudinary.com/dsqu3qet6/image/upload/v1776234323/adopt-me/animales/..."
@@ -70,9 +69,9 @@ export const addAnimal = async (req, res) => {
           })
         : [];
 
-    console.log("✅ Datos recibidos:", { nombre, raza, edad, tamano, sexo });
-    console.log("📸 Fotos capturadas:", fotos.length);
-    console.log("📸 URLs de Cloudinary:", fotos);
+    console.log("Datos recibidos:", { nombre, raza, edad, tamano, sexo });
+    console.log("Fotos capturadas:", fotos.length);
+    console.log("URLs de Cloudinary:", fotos);
 
 
     if (!Array.isArray(fotos) || fotos.length < 1 || fotos.length > 5) {
@@ -86,8 +85,8 @@ export const addAnimal = async (req, res) => {
     const esterilizadoBoolean =
       esterilizado === "true" || esterilizado === true;
 
-    // 🗄️  Crear el documento en MongoDB
-    const nuevoAnimal = await Perro.create({
+    // Crear el documento en MongoDB
+    const nuevoAnimal = await Perro.create({ 
       nombre,
       raza,
       edad: Number(edad),
@@ -105,23 +104,18 @@ export const addAnimal = async (req, res) => {
       ubicacion: propietario.ubicacion || "",
     });
 
-    // ✅ Responder con el ID del animal creado
+    // Responder con el ID del animal creado
     res.status(201).json({ id: nuevoAnimal._id });
   } catch (error) {
-    // ❌ Manejo de errores
-    console.error("❌ Error en addAnimal:", error);
+    console.error("Error en addAnimal:", error);
     res.status(500).json({
       message: "Error al insertar el Animal",
       error: error.message,
-      // Detalles de errores de validación si los hay
-      details: error.errors
-        ? Object.values(error.errors).map((e) => e.message)
-        : null,
     });
   }
 };
 
-export const updateAnimal = async (req, res) => {
+export const updateAnimal = async (req, res) => { //actualizamos el animal
   try {
     const {
       nombre,
@@ -186,7 +180,7 @@ export const updateAnimal = async (req, res) => {
   }
 };
 
-export const delAnimal = async (req, res) => {
+export const delAnimal = async (req, res) => { //eliminar un animal por su id
   try {
     const { id } = req.params;
     // 1. Verificar que el usuario existe
@@ -199,7 +193,7 @@ export const delAnimal = async (req, res) => {
 
     console.log(animal);
 
-    await Perro.findByIdAndDelete(id);
+    await Perro.findByIdAndDelete(id); // se elimina
 
     res.status(200).json({ message: "Animal borrado" });
   } catch (error) {
@@ -209,17 +203,17 @@ export const delAnimal = async (req, res) => {
   }
 };
 
-export const darMegusta = async (req, res) => {
+export const darMegusta = async (req, res) => { //damos me gusta al animal
   try {
-    const { id } = req.params;
-    const { usuario_id } = req.body;
+    const { id } = req.params; // pillamos el id del animal
+    const { usuario_id } = req.body; // y el del usuario
 
     if (!usuario_id) {
       return res.status(400).json({ message: "usuario_id es requerido" });
     }
 
-    const perro = await Perro.findById(id);
-    const usuario = await Usuario.findById(usuario_id);
+    const perro = await Perro.findById(id); //busca el animal
+    const usuario = await Usuario.findById(usuario_id); //y el usuario
 
     if (!perro)
       return res.status(404).json({ message: "Animal no encontrado" });
@@ -239,14 +233,14 @@ export const darMegusta = async (req, res) => {
     const animalActualizado = await Perro.findByIdAndUpdate(
       id,
       { $push: { megustas: usuarioObjectId } },
-      { new: true, runValidators: false }
+      { new: true, runValidators: false } // devulve el documento actualizado y no aplica validaciones
     );
 
     // Actualizar el usuario: añadir animal a favoritos
     const usuarioActualizado = await Usuario.findByIdAndUpdate(
       usuario_id,
       { $push: { favoritos: animalObjectId } },
-      { new: true, runValidators: false }
+      { new: true, runValidators: false } // devulve el documento actualizado y no aplica validaciones
     );
 
     res.status(200).json({ 
@@ -260,16 +254,16 @@ export const darMegusta = async (req, res) => {
   }
 };
 
-export const quitarMegusta = async (req, res) => {
+export const quitarMegusta = async (req, res) => { // para quitar el me gusta
   try {
-    const { id } = req.params;
-    const { usuario_id } = req.body;
+    const { id } = req.params; // pillamos el id del animal
+    const { usuario_id } = req.body; // y el de usuario
 
     if (!usuario_id) {
       return res.status(400).json({ message: "usuario_id es requerido" });
     }
 
-    const perro = await Perro.findById(id);
+    const perro = await Perro.findById(id); //busca el animal
     const usuario = await Usuario.findById(usuario_id);
 
     if (!perro)
@@ -286,14 +280,14 @@ export const quitarMegusta = async (req, res) => {
     const animalActualizado = await Perro.findByIdAndUpdate(
       id,
       { $pull: { megustas: usuarioObjectId } },
-      { new: true, runValidators: false }
+      { new: true, runValidators: false } // devulve el documento actualizado y no aplica validaciones
     );
 
     // Actualizar el usuario: quitar animal de favoritos
     const usuarioActualizado = await Usuario.findByIdAndUpdate(
       usuario_id,
       { $pull: { favoritos: animalObjectId } },
-      { new: true, runValidators: false }
+      { new: true, runValidators: false } // devulve el documento actualizado y no aplica validaciones
     );
 
     res.status(200).json({ 

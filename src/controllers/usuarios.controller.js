@@ -159,10 +159,10 @@ export const updateAvatar = async (req, res) => {
     }
 
     const photoUrl = req.file.path;
-    console.log("🌐 URL a guardar:", photoUrl);
+    console.log("URL a guardar:", photoUrl);
 
     // Buscamos al usuario por ID en MongoDB
-    console.log("🔍 Buscando usuario en MongoDB...");
+    console.log("Buscando usuario en MongoDB...");
     const usuario = await Usuario.findByIdAndUpdate(
       id,
       { photo: photoUrl },
@@ -170,12 +170,12 @@ export const updateAvatar = async (req, res) => {
     );
 
     if (!usuario) {
-      console.log("❌ Usuario no encontrado:", id);
+      console.log("Usuario no encontrado:", id);
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
 
-    console.log("✅ Usuario actualizado correctamente");
-    console.log("📸 URL guardada en BD:", usuario.photo);
+    console.log("Usuario actualizado correctamente");
+    console.log("URL guardada en BD:", usuario.photo);
     console.log("=========== FIN SUBIDA ==========\n");
 
     res.status(200).json({
@@ -184,7 +184,7 @@ export const updateAvatar = async (req, res) => {
       usuario: usuario,
     });
   } catch (error) {
-    console.log("\n🔴 ERROR EN UPDATEAVATAR:");
+    console.log("ERROR EN UPDATEAVATAR:");
     console.log("Mensaje:", error.message);
     console.log("Stack:", error.stack);
     console.log("=========== FIN ERROR ==========\n");

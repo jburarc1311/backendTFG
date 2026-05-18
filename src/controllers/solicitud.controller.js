@@ -7,7 +7,7 @@ import { enviarEmailSolicitud } from "../services/resend.js";
 // CREAR solicitud de adopción
 export const addSolicitud = async (req, res) => {
   try {
-    const { perro_id, adoptante_id, propietario_id, mensaje } = req.body;
+    const { perro_id, adoptante_id, propietario_id, mensaje } = req.body; // leemos el body
 
     // Validación: campos requeridos
     if (!perro_id || !adoptante_id || !propietario_id) {
@@ -58,10 +58,10 @@ export const addSolicitud = async (req, res) => {
         mensaje,
         emailDestino: propietario.email,
       });
-      console.log("✅ Email de notificación enviado al propietario");
+      console.log("Email de notificación enviado al propietario");
     } catch (emailError) {
       console.warn(
-        "⚠️ Error al enviar email, pero la solicitud se creó:",
+        "Error al enviar email, pero la solicitud se creó:",
         emailError.message,
       );
     }
@@ -71,7 +71,7 @@ export const addSolicitud = async (req, res) => {
       data: nuevaSolicitud,
     });
   } catch (error) {
-    console.error("❌ Error al crear solicitud:", error);
+    console.error("Error al crear solicitud:", error);
     res.status(500).json({
       message: "Error al crear la solicitud",
       error: error.message,
@@ -92,7 +92,7 @@ export const getSolicitudesEnviadas = async (req, res) => {
       data: solicitudesEnviadas,
     });
   } catch (error) {
-    console.error("❌ Error al obtener solicitudes:", error);
+    console.error("Error al obtener solicitudes:", error);
     res.status(500).json({
       message: "Error al obtener las solicitudes",
       error: error.message,
@@ -127,7 +127,7 @@ export const getallSolicitudes = async (req, res) => {
       data: solicitudes,
     });
   } catch (error) {
-    console.error("❌ Error al obtener solicitudes:", error);
+    console.error("Error al obtener solicitudes:", error);
     res.status(500).json({
       message: "Error al obtener las solicitudes",
       error: error.message,
@@ -151,7 +151,7 @@ export const getSolicitudById = async (req, res) => {
       data: solicitud,
     });
   } catch (error) {
-    console.error("❌ Error al obtener solicitud:", error);
+    console.error("Error al obtener solicitud:", error);
     res.status(500).json({
       message: "Error al obtener la solicitud",
       error: error.message,
@@ -175,7 +175,7 @@ export const delSolicitud = async (req, res) => {
       data: solicitudEliminada,
     });
   } catch (error) {
-    console.error("❌ Error al eliminar solicitud:", error);
+    console.error("Error al eliminar solicitud:", error);
     res.status(500).json({
       message: "Error al eliminar la solicitud",
       error: error.message,
