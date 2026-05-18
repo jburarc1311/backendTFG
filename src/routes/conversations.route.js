@@ -17,6 +17,5 @@ router.get("/", autenticarToken, listConversations);
 router.get("/:id", autenticarToken, getConversation);
 router.get("/:conversationId/messages", autenticarToken, getMessages);
 router.post("/:conversationId/messages", autenticarToken, createMessage);
-router.delete("/:conversationId/messages/:messageId",autenticarToken,deleteMessage,);
 
 export const conversationRoutes = router;
