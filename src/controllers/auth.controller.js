@@ -11,12 +11,10 @@ import client from '../config/google.js';
 import jwt from 'jsonwebtoken';
 
 
-// REGISTRO de nuevo usuario
+// registro de nuevo usuario
 export const register = async (req, res) => {
   try {
     const { name, email, password, descripcion, ubicacion } = req.body;
-
-    console.log("BODY REGISTER:", req.body);
 
     // Hashea la contraseña de forma segura
     const saltRounds = 10;
@@ -40,8 +38,8 @@ export const register = async (req, res) => {
     });
 
     // Enviar email de activaciónv
-    const urlActivacion = `${process.env.URL}/api/auth/activate/${activationToken}`;
-    const htmlContent = contenidoHTML(email, name, urlActivacion);
+    const urlActivacion = `${process.env.URL}/api/auth/activate/${activationToken}`; // endpoint de activación
+    const htmlContent = contenidoHTML(email, name, urlActivacion); //html del correo
 
     try {
       await enviaremailActivacion(email, urlActivacion, name);
@@ -50,7 +48,7 @@ export const register = async (req, res) => {
       console.log("Error enviando email:", err.message);
     }
 
-    // Preparar payload para los tokens (SIN password)
+    // Preparar payload para los tokens sin contraseña
     const payload = {
       id: nuevoUsuario._id,
       email: nuevoUsuario.email,
@@ -75,7 +73,7 @@ export const register = async (req, res) => {
       data: { id: nuevoUsuario._id, accessToken },
     });
   } catch (error) {
-    console.error("❌ Error en registro:", error);
+    console.error("Error en registro:", error);
     console.error("Detalles del error:", error.message);
 
     // Error de duplicado (email único)
@@ -104,30 +102,29 @@ export const register = async (req, res) => {
 // LOGIN de usuario existente
 export const login = async (req, res) => {
   try {
-    console.log("REQ BODY LOGIN:", req.body);
-
     const usuario = await Usuario.findOne({ email: req.body.email });
-
+    //vemos si esta creado el usuario
     if (!usuario) {
       return res.status(401).json({ message: "No existe usuario" });
     }
 
     const validPass = await bcrypt.compare(req.body.password, usuario.password);
-
+    //comprobamos la contraseña
     if (!validPass) {
       return res.status(401).json({ message: "Contraseña incorrecta" });
     }
 
+    //se crea el payload
     const payload = {
       id: usuario._id,
       email: usuario.email,
       role: usuario.role,
     };
 
-    const accessToken = generarAccessToken(payload);
-    const refreshToken = generarRefreshToken(payload);
+    const accessToken = generarAccessToken(payload); //genera el token de acceso (para las rutas protegidas)
+    const refreshToken = generarRefreshToken(payload); //para pedir un nuevo access token cuando se vaya
 
-    res.cookie("refreshToken", refreshToken, {
+    res.cookie("refreshToken", refreshToken, { //guardo el refresh token en una cookie
       httpOnly: true,
       secure: false,
       sameSite: "strict",
@@ -165,7 +162,7 @@ export const refreshToken = async (req, res) => {
         .status(401)
         .json({ message: "Refresh token no proporcionado" });
 
-    const payload = verificarRefreshToken(token); // tu función de JWT
+    const payload = verificarRefreshToken(token); //función de JWT
 
     if (!payload)
       return res
@@ -181,7 +178,7 @@ export const refreshToken = async (req, res) => {
     if (!usuario.active)
       return res.status(403).json({ message: "Usuario inactivo" });
 
-    // quitar el ataributo iat y exp
+    // quitar el ataributo iat la fehca uqe se creo el token y exp la fecha que se va el token
     const { iat, exp, ...payloadBis } = payload;
     // Generar nuevos tokens
 
@@ -207,7 +204,7 @@ export const refreshToken = async (req, res) => {
   }
 };
 
-// construir el contenido HTML del email de activación
+// construir el HTML del email de activación
 const contenidoHTML = (email, name, urlActivacion) => {
   return `
             <!DOCTYPE html>
@@ -281,7 +278,7 @@ export const activaCuenta = async (req, res) => {
         </head>
         <body>
           <div class="container">
-            <h1>❌ Error de Activación</h1>
+            <h1>Error de Activación</h1>
             <p>El enlace de activación es inválido o ha expirado.</p>
             <p>Por favor, intenta registrarte de nuevo.</p>
             <a href="https://adoptmee.site/login">Volver al Registro</a>
@@ -314,7 +311,7 @@ export const activaCuenta = async (req, res) => {
       </head>
       <body>
         <div class="container">
-          <h1>✅ ¡Cuenta Activada!</h1>
+          <h1>¡Cuenta Activada!</h1>
           <p>Tu cuenta ha sido activada correctamente.</p>
           <p>Ya puedes iniciar sesión en la plataforma.</p>
           <a href="https://adoptmee.site/login">Ir al Login</a>
@@ -341,7 +338,7 @@ export const activaCuenta = async (req, res) => {
       </head>
       <body>
         <div class="container">
-          <h1>❌ Error</h1>
+          <h1>Error</h1>
           <p>Hubo un error al activar tu cuenta.</p>
           <p>Por favor, intenta más tarde.</p>
           <a href="https://adoptmee.site/login">Volver al Inicio</a>
@@ -357,34 +354,31 @@ export const googleLogin = async (req, res) => {
 
   try {
 
-    const { token } = req.body;
+    const { token } = req.body; // el token de Google que envía el frontend
 
     const ticket = await client.verifyIdToken({
       idToken: token,
       audience: process.env.GOOGLE_CLIENT_ID
     });
 
-    const payload = ticket.getPayload();
+    const payload = ticket.getPayload(); // obtiene la informacion del token
 
-    const { sub, email, name, picture } = payload;
+    const { sub, email, name, picture } = payload; // Extrae datos del usuario de Google
 
     // buscar usuario
-    let user = await Usuario.findOne({ email });
+    let user = await Usuario.findOne({ email }); // Busca si ya existe un usuario con ese email 
 
     // crear si no existe
-    if (!user) {
-      user = await Usuario.create({
-        name,
-        email,
-        photo: picture,
-        googleId: sub,
-        active: true
+    if (!user) { // si no existe lo crea con los datos de Google
+      return res.status(404).json({
+        ok: false,
+        msg: 'El usuario no está registrado. Debe registrarse primero.',
       });
     }
 
     // crear JWT propio
     const jwtToken = jwt.sign(
-      { id: user._id },
+      { id: user._id, email: user.email, role: user.role },
       process.env.SECRET_KEY,
       { expiresIn: '7d' }
     );
@@ -393,7 +387,7 @@ export const googleLogin = async (req, res) => {
       ok: true,
       token: jwtToken,
       user
-    });
+    }); // devolvemos al front el token
 
   } catch (error) {
     console.log(error);
