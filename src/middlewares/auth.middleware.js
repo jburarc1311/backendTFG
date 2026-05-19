@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken"; // importa la librería jsonwebtoken se usa para
 import { SECRET_KEY, REFRESH_SECRET_KEY } from "../config.js";
 
 // Tiempo de expiración de tokens
-export const ACCESS_TOKEN_EXPIRY = "1m"; // Prueba rápida del refresh
+export const ACCESS_TOKEN_EXPIRY = "20m"; // 20 minutos
 export const REFRESH_TOKEN_EXPIRY = "7d"; // 7 días
 
 // Generar Access Token
