@@ -90,13 +90,13 @@ export const updateUsuario = async (req, res) => {
 export const delUsuario = async (req, res) => {
   try {
     const { id } = req.params;
-    // 1. Verificar que el usuario existe
+    //Verificar que el usuario existe
     const usuario = await Usuario.findById(id);
 
     if (!usuario) {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
-    // 2. Evitar que un usuario se elimine a sí mismo (opcional)
+    //Evitar que un usuario se elimine a sí mismo
 
     console.log(usuario);
     if (usuario._id === id) {
@@ -105,7 +105,7 @@ export const delUsuario = async (req, res) => {
       });
     }
 
-    // 3. Evitar eliminar al último Admin (opcional pero recomendado)
+    // Evitar eliminar al último 
     if (usuario.role === "Admin") {
       const totalAdmins = await User.countDocuments({ role: "Admin" });
 

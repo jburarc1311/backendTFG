@@ -10,6 +10,12 @@ import {enviarEmailContacto,enviaremailActivacion,} from "../services/resend.js"
 import client from '../config/google.js';
 import jwt from 'jsonwebtoken';
 
+const refreshCookieOptions = () => ({
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  path: "/api",
+});
 
 // registro de nuevo usuario
 export const register = async (req, res) => {
@@ -60,12 +66,7 @@ export const register = async (req, res) => {
     const refreshToken = generarRefreshToken(payload);
 
     // Guardar refresh token en el navegador junto con la respuesta Http
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true, //La cookie no se puede leer con JavaScript
-      secure: false, //La cookie solo se envia por HTTPS. True en producción
-      sameSite: "strict", //Evita que la cookie sea enviada desde otros sitios
-      path: "/api", //la cookie se enviará a todos los endpoints de /api
-    });
+    res.cookie("refreshToken", refreshToken, refreshCookieOptions());
 
     res.status(201).json({
       message:
@@ -124,12 +125,7 @@ export const login = async (req, res) => {
     const accessToken = generarAccessToken(payload); //genera el token de acceso (para las rutas protegidas)
     const refreshToken = generarRefreshToken(payload); //para pedir un nuevo access token cuando se vaya
 
-    res.cookie("refreshToken", refreshToken, { //guardo el refresh token en una cookie
-      httpOnly: true,
-      secure: false,
-      sameSite: "strict",
-      path: "/api",
-    });
+    res.cookie("refreshToken", refreshToken, refreshCookieOptions());
 
     return res.json({
       message: "Login correcto",
@@ -187,12 +183,7 @@ export const refreshToken = async (req, res) => {
     const nuevoRefreshToken = generarRefreshToken(payloadBis);
 
     // Guardar refresh token en el navegador junto con la respuesta Http
-    res.cookie("refreshToken", nuevoRefreshToken, {
-      httpOnly: true, //La cookie no se puede leer con JavaScript
-      secure: false, //La cookie solo se envia por HTTPS. True en producción
-      sameSite: "strict", //Evita que la cookie sea enviada desde otros sitios
-      path: "/api", //la cookie se enviará a todos los endpoints de /api
-    });
+    res.cookie("refreshToken", nuevoRefreshToken, refreshCookieOptions());
     res.status(200).json({
       message: "Token renovado exitosamente",
       accessToken: nuevoAccessToken,
