@@ -4,6 +4,7 @@ import {
   createOrGetConversation,
   listConversations,
   getConversation,
+  eliminarConversacion,
 } from "../controllers/conversations.controller.js";
 import {
   getMessages,
@@ -15,6 +16,7 @@ const router = express.Router();
 router.post("/", autenticarToken, createOrGetConversation);
 router.get("/", autenticarToken, listConversations);
 router.get("/:id", autenticarToken, getConversation);
+router.delete("/:id", autenticarToken, eliminarConversacion);
 router.get("/:conversationId/messages", autenticarToken, getMessages);
 router.post("/:conversationId/messages", autenticarToken, createMessage);
 

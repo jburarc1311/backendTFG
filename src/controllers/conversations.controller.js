@@ -1,4 +1,5 @@
 import { Conversation } from "../models/conversation.model.js";
+import { Message } from "../models/message.model.js";
 import mongoose from "mongoose";
 
 // Crear o devolver conversación entre dos participantes sin duplicados
@@ -73,6 +74,34 @@ export const getConversation = async (req, res) => {
     return res.json(conv);
   } catch (error) {
     console.error("getConversation error:", error.message);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+// Eliminar una conversación y todos sus mensajes asociados
+export const eliminarConversacion = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?.id;
+
+    if (!mongoose.Types.ObjectId.isValid(id))
+      return res.status(400).json({ message: "ID de conversación inválido" });
+
+    const conv = await Conversation.findById(id);
+    if (!conv) return res.status(404).json({ message: "Conversación no encontrada" });
+
+    // Comprobar que el usuario que solicita la eliminación es participante
+    const isParticipant = conv.participants.some((p) => p.toString() === userId);
+    if (!isParticipant)
+      return res.status(403).json({ message: "No autorizado para eliminar esta conversación" });
+
+    // Borrar mensajes asociados y la conversación
+    await Message.deleteMany({ conversationId: conv._id });
+    await Conversation.findByIdAndDelete(id);
+
+    return res.json({ message: "Conversación y mensajes eliminados" });
+  } catch (error) {
+    console.error("eliminarConversacion error:", error.message);
     return res.status(500).json({ message: error.message });
   }
 };
