@@ -3,17 +3,14 @@ import { Conversation } from "../models/conversation.model.js";
 
 let conexion = null;
 
-// Nota: la limpieza de índices legacy se removió; mantenemos sincronización de índices
-// utilizando Mongoose para evitar drops automáticos en producción.
-
-export const conexionBD = async () => { //permite la conexión a la base de datos
+export const conexionBD = async () => { 
   try {
     if (conexion && mongoose.connection.readyState === 1) {
       console.log("Ya existe una conexión activa a MongoDB"); //Comprueba si ya existe una conexión activa
       return conexion;
     }
 
-    conexion = await mongoose.connect(process.env.MONGODB_URI, { //Llama a Mongoose para crear una nueva conexión con la URI de mongodb
+    conexion = await mongoose.connect(process.env.MONGODB_URI, { 
       dbName: "tfg",
       serverSelectionTimeoutMS: 30000,
     });
