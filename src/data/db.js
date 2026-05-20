@@ -3,23 +3,8 @@ import { Conversation } from "../models/conversation.model.js";
 
 let conexion = null;
 
-const limpiarIndicesAntiguosConversaciones = async () => {
-  const collection = mongoose.connection.db.collection("conversations");
-  const indicesLegacy = ["participants_1", "participant1_1_participant2_1"];
-
-  for (const nombreIndice of indicesLegacy) {
-    try {
-      await collection.dropIndex(nombreIndice);
-      console.log(`Índice legacy ${nombreIndice} eliminado`);
-    } catch (error) {
-      const indiceNoExiste = error?.code === 27 || /index not found/i.test(error?.message || "");
-      if (!indiceNoExiste) throw error;
-    }
-  }
-
-  await Conversation.syncIndexes();
-  console.log("Índices de conversations sincronizados");
-};
+// Nota: la limpieza de índices legacy se removió; mantenemos sincronización de índices
+// utilizando Mongoose para evitar drops automáticos en producción.
 
 export const conexionBD = async () => { //permite la conexión a la base de datos
   try {
@@ -33,7 +18,8 @@ export const conexionBD = async () => { //permite la conexión a la base de dato
       serverSelectionTimeoutMS: 30000,
     });
 
-    await limpiarIndicesAntiguosConversaciones();
+    // Sincronizar índices del modelo con la colección
+    await Conversation.syncIndexes();
 
     console.log("Conexión exitosa a MongoDB");
     return conexion.connection;
