@@ -19,3 +19,7 @@ ConversationSchema.index({ participant1: 1 });
 ConversationSchema.index({ participant2: 1 });
 
 export const Conversation = mongoose.model('Conversation', ConversationSchema);
+
+
+
+
