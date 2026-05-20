@@ -75,7 +75,7 @@ export const updateUsuario = async (req, res) => {
     const usuario = await Usuario.findByIdAndUpdate(
       id, //filtro
       { name, descripcion, ubicacion }, //datos a actualizar
-      { new: true, runValidators: true },
+      { returnDocument: "after", runValidators: true },
     ); //devolver documento actualizado y aplica validaciones.
 
     res.status(200).json({ message: `Usuario actualizado ${usuario._id}  ` });
@@ -166,7 +166,7 @@ export const updateAvatar = async (req, res) => {
     const usuario = await Usuario.findByIdAndUpdate(
       id,
       { photo: photoUrl },
-      { new: true },
+      { returnDocument: "after" },
     );
 
     if (!usuario) {
@@ -266,7 +266,7 @@ export const desactivarUsuario = async (req, res) => {
     const usuario = await Usuario.findByIdAndUpdate(
       id,
       { active: false },
-      { new: true }
+      { returnDocument: "after" }
     );
     if (!usuario) {
       return res.status(404).json({ message: "Usuario no encontrado" });
@@ -289,7 +289,7 @@ export const activarUsuario = async (req, res) => {
     const usuario = await Usuario.findByIdAndUpdate(
       id,
       { active: true },
-      { new: true }
+      { returnDocument: "after" }
     );
     if (!usuario) {
       return res.status(404).json({ message: "Usuario no encontrado" });

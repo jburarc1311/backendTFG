@@ -189,7 +189,7 @@ export const rechazarSolicitud = async (req, res) => {
     const solicitudRechazada = await Solicitud.findByIdAndUpdate(
       id,
       { estado: "Rechazada" },
-      { new: true },
+      { returnDocument: "after" },
     );
 
     if (!solicitudRechazada) {
@@ -225,7 +225,7 @@ export const aceptarSolicitud = async (req, res) => {
     const perroActualizado = await Perro.findByIdAndUpdate(
       solicitud.perro_id,
       { estado: "adoptado" },
-      { new: true, runValidators: true },
+      { returnDocument: "after", runValidators: true },
     );
 
     if (!perroActualizado) {
@@ -237,7 +237,7 @@ export const aceptarSolicitud = async (req, res) => {
     const solicitudAceptada = await Solicitud.findByIdAndUpdate(
       id,
       { estado: "Aceptada" },
-      { new: true },
+      { returnDocument: "after" },
     );
 
     res.status(200).json({
