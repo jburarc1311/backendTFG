@@ -1,7 +1,7 @@
 // models/Alumno.js
 import mongoose from 'mongoose';
 
-export const Usuario = mongoose.model('Usuario', new mongoose.Schema({ //nueva tabla usuarios
+export const Usuario = mongoose.model('Usuario', new mongoose.Schema({
 
   name: { //atributo nombre
     type: String,
