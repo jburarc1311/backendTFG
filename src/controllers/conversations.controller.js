@@ -27,7 +27,7 @@ export const createOrGetConversation = async (req, res) => {
 
     // Buscar conversación que contenga solo estos dos participantes
     const existing = await Conversation.findOne({
-      participants: { $all: participants, $size: 2 },
+      participants: { $all: participants},
     });
 
     if (existing) return res.json(existing); // Si ya existe, devuelve la conversación
