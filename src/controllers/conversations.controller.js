@@ -7,9 +7,7 @@ export const createOrGetConversation = async (req, res) => {
   try {
     const { participant1, participant2 } = req.body;
     if (!participant1 || !participant2) {
-      return res
-        .status(400)
-        .json({ message: "Se requieren dos participantes" });
+      return res.status(400).json({ message: "Se requieren dos participantes" });
     }
 
     if (
@@ -19,21 +17,22 @@ export const createOrGetConversation = async (req, res) => {
       return res.status(400).json({ message: "IDs de participantes inválidos" });
     }
 
-    // Normalizar y ordenar los ids para buscar siempre la misma pareja
-    const participants = [
-      new mongoose.Types.ObjectId(participant1),
-      new mongoose.Types.ObjectId(participant2),
-    ].sort((a, b) => a.toString().localeCompare(b.toString()));
+    const p1 = new mongoose.Types.ObjectId(participant1).toString();
+    const p2 = new mongoose.Types.ObjectId(participant2).toString();
 
-    // Buscar conversación que contenga solo estos dos participantes
+    // Buscar conversación existente entre ambos (cualquiera de los dos órdenes)
     const existing = await Conversation.findOne({
-      participants: { $all: participants}, // es para asegurarnos que ambos participantes estén en la conversación
+      $or: [
+        { participant1: p1, participant2: p2 },
+        { participant1: p2, participant2: p1 },
+      ],
     });
 
-    if (existing) return res.json(existing); // Si ya existe, devuelve la conversación
+    if (existing) return res.json(existing);
 
-    const conv = await Conversation.create({ // Si no existe, crea una nueva conversación
-      participants,
+    const conv = await Conversation.create({
+      participant1: p1,
+      participant2: p2,
       messages: [],
       lastMessage: null,
       lastMessageAt: null,
@@ -50,8 +49,9 @@ export const listConversations = async (req, res) => {
     const userId = req.user?.id || req.query.user; // Saca el ID del usuario desde req.user si no intenta cogerlo desde la query
     if (!userId) return res.status(400).json({ message: "Falta user id" });
 
-    const convs = await Conversation.find({ participants: userId }) // busca todas la conversaciones donde este aparece de participante
-      .populate({ path: "participants", select: "name photo" })
+    const convs = await Conversation.find({ $or: [{ participant1: userId }, { participant2: userId }] })
+      .populate({ path: "participant1", select: "name photo" })
+      .populate({ path: "participant2", select: "name photo" })
       .populate({ path: "lastMessage", populate: { path: "sender", select: "name photo" } })
       .sort({ lastMessageAt: -1, createdAt: -1 })
       .lean();
@@ -74,7 +74,8 @@ export const getConversation = async (req, res) => {
           { path: "receiver", select: "name photo" },
         ],
       })
-      .populate({ path: "participants", select: "name photo" }) // Rellena los participantes de la conversación 
+      .populate({ path: "participant1", select: "name photo" }) // Rellena los participantes de la conversación 
+      .populate({ path: "participant2", select: "name photo" })
       .populate({ path: "lastMessage", populate: { path: "sender", select: "name photo" } }) // rellena el último mensaje
       .lean();
     if (!conv)
@@ -100,7 +101,7 @@ export const eliminarConversacion = async (req, res) => {
     if (!conv) return res.status(404).json({ message: "Conversación no encontrada" });
 
     // Comprobar que el usuario que solicita la eliminación es participante
-    const isParticipant = conv.participants.some((p) => p.toString() === userId);
+    const isParticipant = conv.participant1.toString() === userId || conv.participant2.toString() === userId;
     if (!isParticipant)
       return res.status(403).json({ message: "No autorizado para eliminar esta conversación" });
 

@@ -39,27 +39,20 @@ export const createMessage = async (req, res) => {
       return res.status(404).json({ message: "Conversación no encontrada" });
     }
 
-    // Asegurarse de que la conversación tiene al menos dos participantes
-    if (!Array.isArray(conversation.participants) || conversation.participants.length < 2) {
+    // Asegurarse de que la conversación tiene los dos participantes definidos
+    if (!conversation.participant1 || !conversation.participant2) {
       return res.status(400).json({ message: "Conversación inválida: participantes insuficientes" });
     }
 
     const senderObjectId = new mongoose.Types.ObjectId(senderId);
-    // Obtener participantes desde conversation.participants (array normalizado)
-    const participant1 = conversation.participants[0].toString();
-    const participant2 = conversation.participants[1].toString();
+    const p1 = conversation.participant1.toString();
+    const p2 = conversation.participant2.toString();
 
-    if (!mongoose.Types.ObjectId.isValid(senderId) || ![participant1, participant2].includes(senderObjectId.toString())) {
-      return res
-        .status(403)
-        .json({ message: "No perteneces a esta conversación" });
+    if (!mongoose.Types.ObjectId.isValid(senderId) || ![p1, p2].includes(senderObjectId.toString())) {
+      return res.status(403).json({ message: "No perteneces a esta conversación" });
     }
 
-
-    const receiverId =
-      senderObjectId.toString() === participant1
-        ? conversation.participants[1]
-        : conversation.participants[0];
+    const receiverId = senderObjectId.toString() === p1 ? conversation.participant2 : conversation.participant1;
 
     // Crear mensaje asociado a la conversación
     const msg = await Message.create({
