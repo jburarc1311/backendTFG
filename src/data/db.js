@@ -1,6 +1,25 @@
 import mongoose from "mongoose"; //sirve para operar con mongodb
+import { Conversation } from "../models/conversation.model.js";
 
 let conexion = null;
+
+const limpiarIndicesAntiguosConversaciones = async () => {
+  const collection = mongoose.connection.db.collection("conversations");
+  const indicesLegacy = ["participants_1", "participant1_1_participant2_1"];
+
+  for (const nombreIndice of indicesLegacy) {
+    try {
+      await collection.dropIndex(nombreIndice);
+      console.log(`Índice legacy ${nombreIndice} eliminado`);
+    } catch (error) {
+      const indiceNoExiste = error?.code === 27 || /index not found/i.test(error?.message || "");
+      if (!indiceNoExiste) throw error;
+    }
+  }
+
+  await Conversation.syncIndexes();
+  console.log("Índices de conversations sincronizados");
+};
 
 export const conexionBD = async () => { //permite la conexión a la base de datos
   try {
@@ -13,6 +32,8 @@ export const conexionBD = async () => { //permite la conexión a la base de dato
       dbName: "tfg",
       serverSelectionTimeoutMS: 30000,
     });
+
+    await limpiarIndicesAntiguosConversaciones();
 
     console.log("Conexión exitosa a MongoDB");
     return conexion.connection;
