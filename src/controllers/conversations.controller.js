@@ -12,14 +12,23 @@ export const createOrGetConversation = async (req, res) => {
         .json({ message: "Se requieren dos participantes" });
     }
 
-    // Normalizar y ordenar los ids para evitar duplicados
+    if (
+      !mongoose.Types.ObjectId.isValid(participant1) ||
+      !mongoose.Types.ObjectId.isValid(participant2)
+    ) {
+      return res.status(400).json({ message: "IDs de participantes inválidos" });
+    }
+
+    // Normalizar y ordenar los ids para buscar siempre la misma pareja
     const participants = [
       new mongoose.Types.ObjectId(participant1),
       new mongoose.Types.ObjectId(participant2),
     ].sort((a, b) => a.toString().localeCompare(b.toString()));
 
-    // Buscar conversación existente por array exacto de participantes
-    const existing = await Conversation.findOne({ participants });
+    // Buscar conversación que contenga solo estos dos participantes
+    const existing = await Conversation.findOne({
+      participants: { $all: participants, $size: 2 },
+    });
 
     if (existing) return res.json(existing); // Si ya existe, devuelve la conversación
 

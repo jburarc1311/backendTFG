@@ -13,7 +13,7 @@ const ConversationSchema = new mongoose.Schema({
   versionKey: false
 });
 
-// Índice único sobre la lista de participantes (la array debe guardarse ordenada)
-ConversationSchema.index({ participants: 1 }, { unique: true });
+// Índice normal para acelerar búsquedas por participantes sin imponer unicidad
+ConversationSchema.index({ participants: 1 });
 
 export const Conversation = mongoose.model('Conversation', ConversationSchema);
