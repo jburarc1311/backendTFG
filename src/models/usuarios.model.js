@@ -87,4 +87,3 @@ export const Usuario = mongoose.model('Usuario', new mongoose.Schema({ //nueva t
     versionKey: false
   }
 ));
-
