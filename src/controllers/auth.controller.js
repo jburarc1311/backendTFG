@@ -115,6 +115,11 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: "Contraseña incorrecta" });
     }
 
+    //verificar que el usuario está activo
+    if (!usuario.active) {
+      return res.status(403).json({ message: "Usuario inactivo. Por favor, activa tu cuenta a través del email de confirmación." });
+    }
+
     //se crea el payload
     const payload = {
       id: usuario._id,
